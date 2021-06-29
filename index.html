@@ -1,0 +1,114 @@
+<html>
+    <script>
+        /* The user can make on object jump. Gravity pulls the object back down objects move toword the controllable object getting faster and faster if the object collide with the dinosaur the game ends a scorebord will increase while the dinosaur is alive
+        */
+
+        var dinoY = 45;
+        var jumpInterval;
+        var numObstaclesSpawned = 1;
+        var gameSpeed = 1;
+        var isAlive = true;
+        var score = 0;
+        var highScore = 0;
+
+        window.onload = function()
+        {
+            loadHighScore();
+            spawnObstacle();
+            setInterval(function(){
+                score += 1;
+                var scoreLabel = document.getElementById("scoring");
+                scoreLabel.innerHTML = "High Score: " + highScore  + " Score " + score;
+            },100);
+        }
+
+        function loadHighScore()
+        {
+            if (localStorage.getItem("highScore") != null)
+            {
+                highScore = localStorage.getItem("highScore");
+            }
+        } 
+
+        function spawnObstacle(){
+
+            numObstaclesSpawned += 1;
+            if (numObstaclesSpawned % 10 == 1)
+            {
+                gameSpeed *= 1;
+            }
+            var obstacleX = 100;
+
+            var newObstacle = document.createElement("img");
+            newObstacle.style.height = "10%";
+            newObstacle.style.width = "10%";
+            newObstacle.style.position = "absolute";
+            newObstacle.style.top = "45%";
+            newObstacle.style.left = "100%";
+            newObstacle.setAttribute("src", "cactus.png");
+
+            setInterval(function(){
+                obstacleX -= gameSpeed;
+                newObstacle.style.left = obstacleX + "%";
+
+                checkCollision(obstacleX);
+
+            },10);  
+            document.body.appendChild(newObstacle);
+
+            var respawnTime = (Math.random()*1000/gameSpeed) + 500
+
+            setTimeout(function(){
+                spawnObstacle();
+            },respawnTime)
+        }
+
+        function checkCollision(ObstacleX){
+
+            if (isAlive == false) return;
+
+            if (ObstacleX > 36 && ObstacleX < 44 && dinoY > 40){
+                alert("Game Over");
+                isAlive = false;
+                if (score > highScore){
+                    highScore = score;
+                }
+                localStorage.setItem("highScore",highScore);
+                location.reload(); 
+            }
+        }
+
+        window.onkeydown = function(e)
+        {
+            var dino = document.getElementById("dinosaur");
+            if (e.keyCode == 32 || e.keyCode == 38)
+            {
+                var steps = 0;
+                jumpInterval = setInterval(function(){
+                    steps += 1;
+
+                    var change_in_y = getChangeY(steps);
+                    dinoY -= change_in_y;
+
+                    if(dinoY > 45) 
+                    {
+                    dinoY = 45;
+                    clearInterval(jumpInterval);
+                    }
+                    dino.style.top = dinoY + "%";
+                },10)
+            }
+        }
+
+        function getChangeY(steps)
+        {
+            var change = (-(steps-12)*(steps-12) + 144)/75; 
+            return change;
+        }
+
+    </script>
+
+    <img src="dinov2.png" id="dinosaur" style="width: 5%; height: 10%;   position: absolute; left: 40%; top: 45%;">
+    <div id="ground" style="width: 100%; height:5px; background-color: black; position: absolute; left: 0%; top: 55%;"></div>
+    <div id="scoring" style="position: absolute; right: 2%; top: 5%;">High Score: 0 Score 0</div>
+</html>
